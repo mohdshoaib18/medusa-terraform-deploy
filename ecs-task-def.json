@@ -4,10 +4,10 @@
   "requiresCompatibilities": ["FARGATE"],
   "cpu": "512",
   "memory": "1024",
-  "executionRoleArn": "arn:aws:iam::<YOUR_ACCOUNT_ID>:role/ecsTaskExecutionRole",
+  "executionRoleArn": "arn:aws:iam::823944091971:role/ecsTaskExecutionRole",
   "containerDefinitions": [
     {
-      "name": "medusa-container",
+      "name": "medusa-store",
       "image": "mohdshoaib84/medusa-store:latest",
       "essential": true,
       "portMappings": [
@@ -16,7 +16,15 @@
           "hostPort": 9000,
           "protocol": "tcp"
         }
-      ]
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/medusa-task",
+          "awslogs-region": "us-east-1",
+          "awslogs-stream-prefix": "ecs"
+        }
+      }
     }
   ]
 }
