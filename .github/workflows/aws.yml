@@ -43,7 +43,7 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
 
-      # Step 7: Update ECS task definition manually
+      # Step 7: Register new ECS task definition
       - name: Register new ECS task definition
         id: register-task-def
         run: |
@@ -55,7 +55,7 @@ jobs:
       - name: Update ECS service
         run: |
           aws ecs update-service \
-            --cluster medusa-cluster \
+            --cluster medusa-task \
             --service medusa-service \
             --task-definition ${{ steps.register-task-def.outputs.task_definition_arn }} \
             --force-new-deployment \
@@ -65,7 +65,7 @@ jobs:
       - name: Wait for ECS service to stabilize
         run: |
           aws ecs wait services-stable \
-            --cluster medusa-cluster \
+            --cluster medusa-task \
             --services medusa-service \
             --region us-east-1
           echo "ECS service is now stable"
