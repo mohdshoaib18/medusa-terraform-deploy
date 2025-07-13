@@ -43,44 +43,25 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
 
-      # Step 7: Pull Docker image (for ECS)
-      - name: Pull Docker image from Docker Hub
+      # Step 7: Update ECS task definition manually
+      - name: Register new ECS task definition
+        id: register-task-def
         run: |
-          docker pull mohdshoaib84/medusa-store:latest
-          echo "Pulled image: mohdshoaib84/medusa-store:latest"
+          aws ecs register-task-definition \
+            --cli-input-json file://ecs-task-def.json > task-def-result.json
+          echo "task_definition_arn=$(jq -r '.taskDefinition.taskDefinitionArn' task-def-result.json)" >> $GITHUB_OUTPUT
 
-      # Step 8: Update ECS task definition
-      - name: Update ECS task definition
-        id: update-task-def
-        run: |
-          TASK_DEF=$(aws ecs describe-task-definition \
-            --task-definition medusa-task \
-            --region us-east-1)
-
-          NEW_TASK_DEF=$(echo "$TASK_DEF" | jq \
-            '.taskDefinition |
-            .containerDefinitions[0].image = "mohdshoaib84/medusa-store:latest" |
-            del(.taskDefinitionArn, .revision, .status, .requiresAttributes, .compatibilities, .registeredAt, .registeredBy)')
-
-          NEW_TASK_DEF_ARN=$(aws ecs register-task-definition \
-            --region us-east-1 \
-            --cli-input-json "$NEW_TASK_DEF" \
-            | jq -r '.taskDefinition.taskDefinitionArn')
-
-          echo "task_definition_arn=$NEW_TASK_DEF_ARN" >> $GITHUB_OUTPUT
-
-      # Step 9: Update ECS service
+      # Step 8: Update ECS service
       - name: Update ECS service
         run: |
           aws ecs update-service \
             --cluster medusa-cluster \
             --service medusa-service \
-            --task-definition ${{ steps.update-task-def.outputs.task_definition_arn }} \
+            --task-definition ${{ steps.register-task-def.outputs.task_definition_arn }} \
             --force-new-deployment \
             --region us-east-1
-          echo "Updated ECS service"
 
-      # Step 10: Wait for ECS service to stabilize
+      # Step 9: Wait for ECS service to stabilize
       - name: Wait for ECS service to stabilize
         run: |
           aws ecs wait services-stable \
