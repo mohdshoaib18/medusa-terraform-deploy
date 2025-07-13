@@ -7,7 +7,7 @@
   "executionRoleArn": "arn:aws:iam::823944091971:role/ecsTaskExecutionRole",
   "containerDefinitions": [
     {
-      "name": "medusa-store",
+      "name": "medusa-container",
       "image": "mohdshoaib84/medusa-store:latest",
       "essential": true,
       "portMappings": [
@@ -16,15 +16,7 @@
           "hostPort": 9000,
           "protocol": "tcp"
         }
-      ],
-      "logConfiguration": {
-        "logDriver": "awslogs",
-        "options": {
-          "awslogs-group": "/ecs/medusa-task",
-          "awslogs-region": "us-east-1",
-          "awslogs-stream-prefix": "ecs"
-        }
-      }
+      ]
     }
   ]
 }
