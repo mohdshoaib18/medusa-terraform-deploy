@@ -4,18 +4,19 @@
   "requiresCompatibilities": ["FARGATE"],
   "cpu": "512",
   "memory": "1024",
+  "executionRoleArn": "arn:aws:iam::<YOUR_ACCOUNT_ID>:role/ecsTaskExecutionRole",
   "containerDefinitions": [
     {
       "name": "medusa-container",
       "image": "mohdshoaib84/medusa-store:latest",
+      "essential": true,
       "portMappings": [
         {
-          "containerPort": 80,
-          "hostPort": 80,
+          "containerPort": 9000,
+          "hostPort": 9000,
           "protocol": "tcp"
         }
-      ],
-      "essential": true
+      ]
     }
   ]
 }
